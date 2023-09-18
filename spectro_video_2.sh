@@ -32,11 +32,8 @@ cd "$file_name-temp"  # Move into the temporary directory
 # Check if the input file is stereo and extract first channel if necessary
 sox $input_file -n channels && sox $input_file mono.wav remix 1
 
-sample_rate=$(sox --i -r mono.wav)
-
-
 # Add 2.5 seconds of silence before and after
-sox -n -r $sample_rate silence.wav trim 0.0 2.5
+sox -n silence.wav trim 0.0 2.5
 sox mono.wav silence.wav mono_silence.wav
 sox silence.wav mono_silence.wav silence_mono_silence.wav
 
@@ -56,7 +53,7 @@ for ((i=0; i<frame_count; i++)); do
 
     # Generate spectrogram for the frame
     frame_file="frames/frame$(printf %03d $i).png"
-    sox silence_mono_silence.wav -n trim $start_time 5 spectrogram -x 500 -y 500 -r -o "$frame_file"
+    sox silence_mono_silence.wav -n trim $start_time 5 spectrogram -r -o "$frame_file"
 
 percentage=$(( (i * 100) / frame_count + 1 ))
 printf "\rProgress: %s %% " "$percentage"  # Print progress as percentage on the same line
@@ -66,10 +63,12 @@ done
 echo
 
 # Use ffmpeg to create the video
-ffmpeg -framerate $frame_rate -i frames/frame%03d.png -i mono.wav -c:v libx264 -preset slow -crf 20 -c:a aac -b:a 160k -vf "drawbox=x=250:y=10:w=1:h=480:color=red,format=yuv420p" -movflags +faststart "$file_name.mp4" > /dev/null 2>&1
+ffmpeg -framerate $frame_rate -i frames/frame%03d.png -i mono.wav -vf drawbox=x=400:y=10:w=1:h=530:color=red "$file_name.mp4" > /dev/null 2>&1
 
 cp "$file_name.mp4" ..  # Copy the generated video to the parent directory
 
 cd ..  # Move back to the parent directory
 
-# rm -r "$file_name-temp"  # Remove the temporary directory and its contents
+rm -r "$file_name-temp"  # Remove the temporary directory and its contents
+
+echo "The animated spectrogram of $file_name has been successfully created."
