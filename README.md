@@ -2,4 +2,4 @@
 
 Usage: `bash spectro_video.sh example.wav`
 
-![](https://raw.githubusercontent.com/lucasvoirin/spectro_video/main/example.mp4)
+[example.mp4](https://raw.githubusercontent.com/lucasvoirin/spectro_video/main/example.mp4)
